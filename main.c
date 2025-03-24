@@ -23,7 +23,7 @@ int main(void)
     K3_OFF; 
 
     int estado = 0; 
-
+    int tempo = 0;
     while (1) 
     {
         // Se pressionar S1 (PB2), inicia sequência estrela-triângulo
@@ -35,7 +35,7 @@ int main(void)
         // Se pressionar S0 (PB1), desliga tudo
         if (!(PINB & (1<<1)))  
         {
-            estado = 2; 
+            estado = 10; 
         }
 
         switch (estado)
@@ -43,18 +43,29 @@ int main(void)
             case 1:
                 K1_ON;  // Liga K1 (estrela)
                 K2_ON;  // Liga K2 
-                _delay_ms(5000); // Aguarda tempo da estrela
-				K2_OFF; // Desliga K2 (transição)
-				_delay_ms(1); // Pequeno intervalo de segurança
- 				break;  
-			case 2:
-				K3_ON;  // Liga K3 (triângulo)
-				estado = 0; // Retorna ao estado inicial
-				break;
+                tempo = 5000;
+                estado = 2;
+                break;
+
+            case 2:
+                --tempo;
+                _delay_ms(1);
+                if (tempo == 0)
+                {
+                    estado = 3;
+                }
+                break;
             case 3:
+
+				K2_OFF; // Desliga K2 (transição)
+
+				K3_ON;  // Liga K3 (triângulo)
+				estado = 3; // Retorna ao estado inicial
+				break;
+            case 10:
                 // Desliga todos os relés
                 PORTB &= ~((1<<3)|(1<<4)|(1<<5));
-                estado = 0; // Retorna ao estado inicial
+                estado = 3; // Retorna ao estado inicial
                 break;
         }
     }
